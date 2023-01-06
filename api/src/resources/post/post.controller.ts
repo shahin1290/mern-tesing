@@ -30,8 +30,6 @@ class PostController implements Controller {
         try {
             const { title, body } = req.body;
 
-            console.log({ title });
-
             const post = await this.PostService.create(title, body);
 
             res.status(201).json({ post });
