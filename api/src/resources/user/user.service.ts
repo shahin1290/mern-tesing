@@ -1,5 +1,5 @@
-import UserModel from '@/resources/user/user.model';
-import token from '@/utils/token';
+import UserModel from '../../resources/user/user.model';
+import token from '../../utils/token';
 
 class UserService {
     private user = UserModel;
