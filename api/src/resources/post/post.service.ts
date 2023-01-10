@@ -16,6 +16,19 @@ class PostService {
             throw new Error('Unable to create post');
         }
     }
+
+    /**
+     * Create a new post
+     */
+    public async findAllPosts(): Promise<Post[]> {
+        try {
+            const posts = await this.post.find({});
+
+            return posts;
+        } catch (error) {
+            throw new Error('No post found');
+        }
+    }
 }
 
 export default PostService;

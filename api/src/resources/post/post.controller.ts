@@ -20,6 +20,7 @@ class PostController implements Controller {
             validationMiddleware(validate.create),
             this.create
         );
+        this.router.get(`${this.path}`, this.getPosts);
     }
 
     private create = async (
@@ -36,6 +37,16 @@ class PostController implements Controller {
         } catch (error) {
             next(new HttpException(400, 'Cannot create post'));
         }
+    };
+
+    private getPosts = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const posts = await this.PostService.findAllPosts();
+
+        res.status(200).send(posts);
     };
 }
 
