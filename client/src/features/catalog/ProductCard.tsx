@@ -8,10 +8,11 @@ import {
   CardMedia,
   Typography,
 } from "@mui/material";
-import { Product } from "../../app/models/product";
+import { Link } from "react-router-dom";
+import { ProductDocument } from "../../app/redux/interfaces/Product";
 
 interface Props {
-  product: Product;
+  product: ProductDocument;
 }
 
 export default function ProductCard({ product }: Props) {
@@ -34,7 +35,7 @@ export default function ProductCard({ product }: Props) {
           backgroundSize: "contain",
           bgcolor: "primary.light",
         }}
-        image={product.pictureUrl}
+        image=""
         title={product.title}
       />
       <CardContent>
@@ -42,12 +43,14 @@ export default function ProductCard({ product }: Props) {
           ${(2000 / 100).toFixed(2)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {product.brand} / {product.type}
+          brand
         </Typography>
       </CardContent>
       <CardActions>
         <Button size="small">Add to cart</Button>
-        <Button size="small">View</Button>
+        <Button component={Link} to={`/catalog/${product._id}`} size="small">
+          View
+        </Button>
       </CardActions>
     </Card>
   );

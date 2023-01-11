@@ -1,19 +1,24 @@
 import { Grid } from "@mui/material";
-import { Product } from "../../app/models/product";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/redux/configureStore";
+import { getProducts } from "../../app/redux/products/productSlice";
 import ProductCard from "./ProductCard";
 
-interface Props {
-  products: Product[];
-}
+export default function ProductList() {
+  const dispatch = useAppDispatch();
+  const { products } = useAppSelector((state) => state.products);
+  useEffect(() => {
+    dispatch(getProducts());
+  }, []);
 
-export default function ProductList({ products }: Props) {
   return (
     <Grid container spacing={4}>
-      {products.map((product) => (
-        <Grid item xs={3} key={product.id}>
-          <ProductCard product={product} />
-        </Grid>
-      ))}
+      {products &&
+        products.map((product) => (
+          <Grid item xs={3} key={product._id}>
+            <ProductCard product={product} />
+          </Grid>
+        ))}
     </Grid>
   );
 }
