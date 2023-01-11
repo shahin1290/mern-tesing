@@ -10,11 +10,9 @@ import Header from "./components/Header";
 import { useDispatch } from "react-redux";
 import { setUser } from "./redux/features/authSlice";
 import AddEditTour from "./pages/AddEditTour";
-import SingleTour from "./pages/SingleTour";
-import Dashboard from "./pages/Dashboard";
+import SingleTour from "./pages/SingleProduct";
 import PrivateRoute from "./components/PrivateRoute";
 import NotFound from "./pages/NotFound";
-import TagTours from "./pages/TagTours";
 
 function App() {
   const dispatch = useDispatch();
@@ -31,7 +29,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tours/search" element={<Home />} />
-          <Route path="/tours/tag/:tag" element={<TagTours />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -51,14 +48,7 @@ function App() {
             }
           />
           <Route path="/tour/:id" element={<SingleTour />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+     
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

@@ -16,20 +16,10 @@ export const createProduct = async (req, res) => {
 };
 
 export const getProducts = async (req, res) => {
-  const { page } = req.query;
   try {
-    // const products = await ProductModal.find();
-    // res.status(200).json(products);
-
-    const limit = 6;
-    const startIndex = (Number(page) - 1) * limit;
-    const total = await ProductModal.countDocuments({});
-    const products = await ProductModal.find().limit(limit).skip(startIndex);
+    const products = await ProductModal.find();
     res.json({
       data: products,
-      currentPage: Number(page),
-      totalProducts: total,
-      numberOfPages: Math.ceil(total / limit),
     });
   } catch (error) {
     res.status(404).json({ message: "Something went wrong" });

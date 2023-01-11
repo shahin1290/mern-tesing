@@ -6,12 +6,11 @@ import {
   MDBBtn,
   MDBInput,
 } from "mdb-react-ui-kit";
-import ChipInput from "material-ui-chip-input";
 import FileBase from "react-file-base64";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createTour, updateTour } from "../redux/features/tourSlice";
+import { createProduct, updateProduct } from "../redux/features/productSlice";
 
 const initialState = {
   name: "",
@@ -19,27 +18,18 @@ const initialState = {
   price: "",
 };
 
-const AddEditTour = () => {
-  const [tourData, setTourData] = useState(initialState);
+const AddEditProduct = () => {
+  const [productData, setProductData] = useState(initialState);
 
-  const { error, userTours } = useSelector((state) => ({
-    ...state.tour,
+  const { error, userProducts } = useSelector((state) => ({
+    ...state.product,
   }));
   const { user } = useSelector((state) => ({ ...state.auth }));
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { name, description, price } = tourData;
+  const { name, description, price } = productData;
   const { id } = useParams();
-
-  useEffect(() => {
-    if (id) {
-      const singleTour = userTours.find((tour) => tour._id === id);
-      console.log(singleTour);
-      setTourData({ ...singleTour });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
 
   useEffect(() => {
     error && toast.error(error);
@@ -49,23 +39,23 @@ const AddEditTour = () => {
     e.preventDefault();
 
     if (name && description && price) {
-      const updatedTourData = { ...tourData };
+      const updatedProductData = { ...productData };
 
       if (!id) {
-        dispatch(createTour({ updatedTourData, navigate, toast }));
+        dispatch(createProduct({ updatedProductData, navigate, toast }));
       } else {
-        dispatch(updateTour({ id, updatedTourData, toast, navigate }));
+        dispatch(updateProduct({ id, updatedProductData, toast, navigate }));
       }
       handleClear();
     }
   };
   const onInputChange = (e) => {
     const { name, value } = e.target;
-    setTourData({ ...tourData, [name]: value });
+    setProductData({ ...productData, [name]: value });
   };
 
   const handleClear = () => {
-    setTourData({ name: "", description: "", price: "" });
+    setProductData({ name: "", description: "", price: "" });
   };
   return (
     <div
@@ -128,7 +118,7 @@ const AddEditTour = () => {
                 type="file"
                 multiple={false}
                 onDone={({ base64 }) =>
-                  setTourData({ ...tourData, imageFile: base64 })
+                  setProductData({ ...productData, imageFile: base64 })
                 }
               />
             </div>
@@ -152,4 +142,4 @@ const AddEditTour = () => {
   );
 };
 
-export default AddEditTour;
+export default AddEditProduct;
