@@ -1,4 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import SignUpPage from "./SignUpPage";
 import { setupServer } from "msw/node";
@@ -54,25 +59,27 @@ describe("Sign Up Page", () => {
   });
 
   describe("Interactions", () => {
-    it("enables the button when password and password repeat fields have same value", () => {
-      render(<SignUpPage />);
-      const passwordInput = screen.getByLabelText("Password");
-      const passwordRepeatInput = screen.getByLabelText("Password Repeat");
-      userEvent.type(passwordInput, "P4ssword");
-      userEvent.type(passwordRepeatInput, "P4ssword");
-      const button = screen.queryByRole("button", { name: "Sign Up" });
-      expect(button).toBeEnabled();
+    let requestBody;
+    let counter = 0;
+    const server = setupServer(
+      rest.post("/api/users/signup", (req, res, ctx) => {
+        requestBody = req.body;
+        counter += 1;
+        return res(ctx.status(200));
+      })
+    );
+
+    beforeEach(() => {
+      counter = 0;
     });
 
-    it("sends username, email and password to backend after clicking the button", async () => {
-      let requestBody;
-      const server = setupServer(
-        rest.post("/api/users/signup", (req, res, ctx) => {
-          requestBody = req.body;
-          return res(ctx.status(200));
-        })
-      );
-      server.listen();
+    beforeAll(() => server.listen());
+
+    afterAll(() => server.close());
+
+    let button;
+
+    const setup = () => {
       render(<SignUpPage />);
       const usernameInput = screen.getByLabelText("Username");
       const emailInput = screen.getByLabelText("E-mail");
@@ -82,7 +89,17 @@ describe("Sign Up Page", () => {
       userEvent.type(emailInput, "user1@mail.com");
       userEvent.type(passwordInput, "P4ssword");
       userEvent.type(passwordRepeatInput, "P4ssword");
-      const button = screen.queryByRole("button", { name: "Sign Up" });
+      button = screen.queryByRole("button", { name: "Sign Up" });
+    };
+
+    it("enables the button when password and password repeat fields have same value", () => {
+      setup();
+      expect(button).toBeEnabled();
+    });
+
+    it("sends username, email and password to backend after clicking the button", async () => {
+      setup();
+
       userEvent.click(button);
       await new Promise((resolve) => setTimeout(resolve, 500));
       expect(requestBody).toEqual({
@@ -90,6 +107,44 @@ describe("Sign Up Page", () => {
         email: "user1@mail.com",
         password: "P4ssword",
       });
+    });
+
+    it("disables button when there is an ongoing api call", async () => {
+      setup();
+      userEvent.click(button);
+      userEvent.click(button);
+
+      await screen.findByText("Sign Up is successful. Please login!");
+
+      expect(counter).toBe(1);
+    });
+    it("displays spinner after clicking the submit", async () => {
+      setup();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      userEvent.click(button);
+      const spinner = screen.getByRole("status");
+      expect(spinner).toBeInTheDocument();
+      await screen.findByText("Sign Up is successful. Please login!");
+    });
+
+    it("displays account activation notification after successful sign up request", async () => {
+      setup();
+      const message = "Sign Up is successful. Please login!";
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+      userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
+    });
+
+    it("hides sign up form after successful sign up request", async () => {
+      setup();
+      const form = screen.getByTestId("form-sign-up");
+      userEvent.click(button);
+      await waitFor(() => {
+        expect(form).not.toBeInTheDocument();
+      });
+
+      // await waitForElementToBeRemoved(form)
     });
   });
 });
