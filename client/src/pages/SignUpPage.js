@@ -1,25 +1,32 @@
 import { Component } from "react";
-
+import axios from "axios";
 
 class SignUpPage extends Component {
   state = {
+    username: "",
+    email: "",
     password: "",
     passwordRepeat: "",
   };
 
-  onChangePassword = (event) => {
-    const currentValue = event.target.value;
+  onChange = (event) => {
+    const { id, value } = event.target;
     this.setState({
-      password: currentValue,
+      [id]: value,
     });
   };
 
-  onChangePasswordRepeat = (event) => {
-    const currentValue = event.target.value;
-    this.setState({
-      passwordRepeat: currentValue,
-    });
+  submit = (event) => {
+    event.preventDefault();
+    const { username, email, password } = this.state;
+    const body = {
+      username,
+      email,
+      password,
+    };
+    axios.post("/api/users/signup", body);
   };
+
   render() {
     let disabled = true;
     const { password, passwordRepeat } = this.state;
@@ -31,18 +38,16 @@ class SignUpPage extends Component {
       <div>
         <h1>Sign Up</h1>
         <label htmlFor="username">Username</label>
-        <input id="username" />
+        <input id="username" onChange={this.onChange} />
         <label htmlFor="email">E-mail</label>
-        <input id="email" />
+        <input id="email" onChange={this.onChange} />
         <label htmlFor="password">Password</label>
-        <input id="password" type="password" onChange={this.onChangePassword} />
+        <input id="password" type="password" onChange={this.onChange} />
         <label htmlFor="passwordRepeat">Password Repeat</label>
-        <input
-          id="passwordRepeat"
-          type="password"
-          onChange={this.onChangePasswordRepeat}
-        />
-        <button disabled={disabled}>Sign Up</button>
+        <input id="passwordRepeat" type="password" onChange={this.onChange} />
+        <button disabled={disabled} onClick={this.submit}>
+          Sign Up
+        </button>
       </div>
     );
   }
