@@ -1,15 +1,8 @@
-import React from "react";
-import { MDBSpinner } from "mdb-react-ui-kit";
-
-const Spinner = () => {
-  return (
-    <MDBSpinner
-      className="me-2"
-      style={{ width: "3rem", height: "3rem", marginTop: "100px" }}
-    >
-      <span className="visually-hidden">Loading...</span>
-    </MDBSpinner>
-  );
+const Spinner = (props) => {
+  let spanClass = "spinner-border";
+  if (props.size !== "big") {
+    spanClass += " spinner-border-sm";
+  }
+  return <span className={spanClass} role="status"></span>;
 };
-
 export default Spinner;
