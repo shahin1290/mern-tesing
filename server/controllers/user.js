@@ -30,7 +30,7 @@ export const signin = async (req, res) => {
 };
 
 export const signup = async (req, res) => {
-  const { email, password, username} = req.body;
+  const { email, password, firstName, lastName } = req.body;
   try {
     const oldUser = await UserModal.findOne({ email });
 
@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
     const result = await UserModal.create({
       email,
       password: hashedPassword,
-      name: username,
+      name: `${firstName} ${lastName}`,
     });
 
     const token = jwt.sign({ email: result.email, id: result._id }, secret, {
@@ -56,3 +56,25 @@ export const signup = async (req, res) => {
   }
 };
 
+export const googleSignIn = async (req, res) => {
+  const { email, name, token, googleId } = req.body;
+
+  try {
+    const oldUser = await UserModal.findOne({ email });
+    if (oldUser) {
+      const result = { _id: oldUser._id.toString(), email, name };
+      return res.status(200).json({ result, token });
+    }
+
+    const result = await UserModal.create({
+      email,
+      name,
+      googleId,
+    });
+
+    res.status(200).json({ result, token });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+    console.log(error);
+  }
+};

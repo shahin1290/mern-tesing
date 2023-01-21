@@ -3,27 +3,23 @@ import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
 import userRouter from "./routes/user.js";
-import productRouter from "./routes/product.js";
-import dotenv from "dotenv";
+import tourRouter from "./routes/tour.js";
 
 const app = express();
-dotenv.config();
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 
-app.use("/api/users", userRouter);
-app.use("/api/products", productRouter);
-app.get("/api", (req, res) => {
-  res.send("Welcome to product API");
-});
+app.use("/users", userRouter); // http://localhost:5000/users/signup
+app.use("/tour", tourRouter);
 
-const port = process.env.PORT || 1337;
+const MONGODB_URL = "mongodb://localhost:27017/amazon";
+const port = 5000;
 
 mongoose
-  .connect(process.env.MONGODB_URL)
+  .connect(MONGODB_URL)
   .then(() => {
     app.listen(port, () => console.log(`Server running on port ${port}`));
   })
