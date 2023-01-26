@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config();
 }
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,11 +24,13 @@ const product = require("./routes/productRoute");
 const user = require("./routes/userRoute");
 const order = require("./routes/orderRoute");
 const payment = require("./routes/paymentRoute");
+const basket = require("./routes/basketRoute");
 
 app.use("/api/v1", product);
 app.use("/api/v1", user);
 app.use("/api/v1", order);
 app.use("/api/v1", payment);
+app.use("/api/v1", basket);
 
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 

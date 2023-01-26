@@ -9,6 +9,7 @@ export default function Catalog() {
 
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     agent.Catalog.list()
       .then((data) => setProducts(data.products))

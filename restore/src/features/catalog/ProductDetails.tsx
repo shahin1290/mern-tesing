@@ -35,7 +35,7 @@ export default function ProductDetails() {
     <Grid container spacing={6}>
       <Grid item xs={6}>
         <img
-          src={product.pictureUrl}
+          src={product.images[0].url}
           alt={product.name}
           style={{ width: "100%" }}
         />
@@ -67,7 +67,7 @@ export default function ProductDetails() {
               </TableRow>
               <TableRow>
                 <TableCell>Quantity in stock</TableCell>
-                <TableCell>{product.quantityInStock}</TableCell>
+                <TableCell>{product.Stock}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
