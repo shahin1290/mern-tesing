@@ -22,7 +22,7 @@ export default function BasketPage() {
 
   useEffect(() => {
     agent.Basket.get()
-      .then((basket) => setBasket(basket))
+      .then((basket) => setBasket(basket.data))
       .catch((error) => console.log(error))
       .finally(() => setLoading(false));
   }, []);
@@ -52,11 +52,11 @@ export default function BasketPage() {
               >
                 <TableCell component="th" scope="row">
                   <Box display="flex" alignItems="center">
-                    <img
+                    {/* <img
                       src={item.pictureUrl}
                       alt={item.name}
                       style={{ height: 50, marginRight: 20 }}
-                    />
+                    /> */}
                     <span>{item.name}</span>
                   </Box>
                 </TableCell>

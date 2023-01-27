@@ -2,77 +2,51 @@ const Basket = require("../models/basketModel");
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
 const ErrorHandler = require("../utils/errorhander");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
-exports.addItemToBasket = async (req, res) => {
+exports.addItemToBasket = catchAsyncErrors(async (req, res) => {
   const { productId, quantity } = req.query;
 
+  let basket = await Basket.findOne({ buyerId: req.cookies.buyerId });
   const product = await Product.findById(productId);
-
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
   }
 
-  const basket = await Basket.findOne({ buyerId: "63d228e5724dd807ace4f6b0" });
+  const price = product.price;
+  const name = product.name;
 
-  let updatedBasket;
+  if (basket) {
+    const itemIndex = basket.items.findIndex(
+      (item) => item.productId == productId
+    );
 
-  if (!basket) {
-    updatedBasket = await Basket.create({
+    if (itemIndex > -1) {
+      let product = basket.items[itemIndex];
+      product.quantity += Number(quantity);
+      basket.items[itemIndex] = product;
+      await basket.save();
+      res.status(200).send(basket);
+    } else {
+      basket.items.push({ productId, name, quantity, price });
+      await basket.save();
+      res.status(200).send(basket);
+    }
+  } else {
+    const options = {
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+    };
+
+    res.cookie("buyerId", "63d228e5724dd807ace4f6b0", options);
+    const newBasket = await Basket.create({
       buyerId: "63d228e5724dd807ace4f6b0",
-      items: [
-        { productId, name: product.name, quantity, price: product.price },
-      ],
+      items: [{ productId, name, quantity, price }],
     });
+    return res.status(201).send(newBasket);
   }
-
-  res.status(201).json({
-    success: true,
-    updatedBasket,
-  });
-
-  // let products = [];
-
-  // const user = await User.findOne({ email: req.user.email }).exec();
-
-  // // check if cart with logged in user id already exist
-  // let cartExistByThisUser = await Cart.findOne({ orderdBy: user._id }).exec();
-
-  // if (cartExistByThisUser) {
-  //   cartExistByThisUser.remove();
-  //   console.log("removed old cart");
-  // }
-
-  // for (let i = 0; i < cart.length; i++) {
-  //   let object = {};
-
-  //   object.product = cart[i]._id;
-  //   object.count = cart[i].count;
-  //   object.color = cart[i].color;
-  //   // get price for creating total
-  //   let { price } = await Product.findById(cart[i]._id).select("price").exec();
-  //   object.price = price;
-
-  //   products.push(object);
-  // }
-
-  // // console.log('products', products)
-
-  // let cartTotal = 0;
-  // for (let i = 0; i < products.length; i++) {
-  //   cartTotal = cartTotal + products[i].price * products[i].count;
-  // }
-
-  // // console.log("cartTotal", cartTotal);
-
-  // let newCart = await new Cart({
-  //   products,
-  //   cartTotal,
-  //   orderdBy: user._id,
-  // }).save();
-
-  // console.log("new cart ----> ", newCart);
-  // res.json({ ok: true });
-};
+});
 
 exports.getBasket = async (req, res) => {
   // const user = await User.findOne({ email: req.user.email }).exec();
@@ -83,5 +57,32 @@ exports.getBasket = async (req, res) => {
     .populate("items.product", "_id name price quantity")
     .exec();
 
-  res.json({ buyerId: user._id, basket });
+  res.json({ buyerId: user._id, data: basket });
 };
+
+// router.delete("/cart/", Auth, async (req, res) => {
+//   const owner = req.user._id;
+//   const itemId = req.query.itemId;
+//   try {
+//     let cart = await Cart.findOne({ owner });
+//     const itemIndex = cart.items.findIndex((item) => item.itemId == itemId);
+//     if (itemIndex > -1) {
+//       let item = cart.items[itemIndex];
+//       cart.bill -= item.quantity * item.price;
+//       if (cart.bill < 0) {
+//         cart.bill = 0;
+//       }
+//       cart.items.splice(itemIndex, 1);
+//       cart.bill = cart.items.reduce((acc, curr) => {
+//         return acc + curr.quantity * curr.price;
+//       }, 0);
+//       cart = await cart.save();
+//       res.status(200).send(cart);
+//     } else {
+//       res.status(404).send("item not found");
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).send();
+//   }
+// });
