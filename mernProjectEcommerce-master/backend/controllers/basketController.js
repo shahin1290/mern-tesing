@@ -60,29 +60,27 @@ exports.getBasket = async (req, res) => {
   res.json({ buyerId: user._id, data: basket });
 };
 
-// router.delete("/cart/", Auth, async (req, res) => {
-//   const owner = req.user._id;
-//   const itemId = req.query.itemId;
-//   try {
-//     let cart = await Cart.findOne({ owner });
-//     const itemIndex = cart.items.findIndex((item) => item.itemId == itemId);
-//     if (itemIndex > -1) {
-//       let item = cart.items[itemIndex];
-//       cart.bill -= item.quantity * item.price;
-//       if (cart.bill < 0) {
-//         cart.bill = 0;
-//       }
-//       cart.items.splice(itemIndex, 1);
-//       cart.bill = cart.items.reduce((acc, curr) => {
-//         return acc + curr.quantity * curr.price;
-//       }, 0);
-//       cart = await cart.save();
-//       res.status(200).send(cart);
-//     } else {
-//       res.status(404).send("item not found");
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(400).send();
-//   }
-// });
+exports.removeItemFromBasket = catchAsyncErrors(async (req, res) => {
+  const { productId, quantity } = req.query;
+  const product = await Product.findById(productId);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  let basket = await Basket.findOne({ buyerId: req.cookies.buyerId });
+  const itemIndex = basket.items.findIndex(
+    (item) => item.productId == productId
+  );
+  if (itemIndex > -1) {
+    let product = basket.items[itemIndex];
+    product.quantity -= Number(quantity);
+    if (product.quantity === 0) {
+      basket.items.splice(itemIndex, 1);
+    } else {
+      basket.items[itemIndex] = product;
+    }
+    await basket.save();
+    res.status(200).send(basket);
+  } else {
+    return next(new ErrorHandler("Item not found", 404));
+  }
+});
